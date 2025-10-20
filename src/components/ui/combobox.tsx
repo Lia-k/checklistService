@@ -35,6 +35,7 @@ interface ComboboxProps<T extends number | string | undefined> {
   inputClass?: string;
   optionsContentClass?: string;
   placeholder?: string;
+  ariaLabel?: string;
 }
 
 export function Combobox<T extends number | string | undefined>({
@@ -47,6 +48,7 @@ export function Combobox<T extends number | string | undefined>({
   commandPlaceholder = "Type to search...",
   inputClass,
   optionsContentClass,
+  ariaLabel,
 }: ComboboxProps<T>) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -103,11 +105,20 @@ export function Combobox<T extends number | string | undefined>({
       <PopoverTrigger asChild>
         <Button
           ref={buttonRef}
-          variant="outline"
+          size="xs"
+          variant="ghost"
           role="combobox"
           aria-expanded={open}
+          aria-label={
+            ariaLabel ??
+            (typeof value === "number" && selectedPredefinedOption
+              ? selectedPredefinedOption.title
+              : typeof value === "string" && value.trim() !== ""
+              ? value
+              : placeholder)
+          }
           className={cn(
-            "w-full justify-between bg-white font-normal",
+            "w-full mt-px justify-between bg-transparent hover:bg-transparent font-normal focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-offset-0 hover:cursor-pointer text-xs",
             inputClass
           )}
         >
@@ -118,7 +129,7 @@ export function Combobox<T extends number | string | undefined>({
               {placeholder}
             </span>
           )}
-          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="h-2 w-2 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent

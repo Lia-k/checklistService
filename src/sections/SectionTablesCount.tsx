@@ -5,7 +5,6 @@ import TableName from "@/components/TableName";
 import PlusTableButton from "@/components/PlusTableButton";
 import { useAppStore } from "@/stores/store";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -13,27 +12,21 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Trash2 } from "lucide-react";
+import { useIsClient } from "@/hooks/useIsClient";
 
 interface SectionTablesCountProps {
   className?: string;
 }
 
 const SectionTablesCount = ({ className }: SectionTablesCountProps) => {
-  const [hasHydrated, setHasHydrated] = useState(false);
+  const isClient = useIsClient();
   const tables = useAppStore((state) => state.tables);
   const currentTableId = useAppStore((state) => state.currentTableId);
   const setCurrentTable = useAppStore((state) => state.setCurrentTable);
   const removeTable = useAppStore((state) => state.removeTable);
 
-  // Simple hydration check
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
-
   // Don't render until hydrated to avoid mismatch
-  if (!hasHydrated) {
-    return null;
-  }
+  if (!isClient) return null;
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -41,7 +34,7 @@ const SectionTablesCount = ({ className }: SectionTablesCountProps) => {
       <TableName />
 
       {/* Table tabs */}
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center" role="tablist" aria-label="Tables">
         {tables.map((table) => (
           <ContextMenu key={table.id}>
             <ContextMenuTrigger asChild>
@@ -50,6 +43,9 @@ const SectionTablesCount = ({ className }: SectionTablesCountProps) => {
                 size="sm"
                 onClick={() => setCurrentTable(table.id)}
                 className="text-xs"
+                role="tab"
+                aria-selected={currentTableId === table.id}
+                aria-label={`Select ${table.name}`}
               >
                 {table.name}
               </Button>

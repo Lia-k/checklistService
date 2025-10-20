@@ -8,11 +8,14 @@ import { cn } from "@/lib/utils";
 
 interface TableNameProps {
   className?: string;
+  disabled?: boolean;
+  onNameChange?: (newName: string, tableId: string) => void;
 }
 
-const TableName = ({ className }: TableNameProps) => {
+const TableName = ({ className, disabled = false, onNameChange }: TableNameProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState("");
+  const [editingTableId, setEditingTableId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const currentTable = useAppStore((state) => state.getCurrentTable());
@@ -27,17 +30,24 @@ const TableName = ({ className }: TableNameProps) => {
   }, [isEditing]);
 
   const handleClick = () => {
-    if (!currentTable) return;
+    if (disabled || !currentTable) return;
     setIsEditing(true);
     setEditText(currentTable.name);
+    setEditingTableId(currentTable.id);
   };
 
   const finishEditing = () => {
     setIsEditing(false);
     const trimmedText = editText.trim();
-    if (trimmedText && currentTable && trimmedText !== currentTable.name) {
-      updateTableName(currentTable.id, trimmedText);
+    const tableId = editingTableId ?? useAppStore.getState().getCurrentTable()?.id;
+    if (trimmedText && tableId) {
+      const freshCurrent = useAppStore.getState().tables.find((t) => t.id === tableId);
+      if (!freshCurrent || trimmedText !== freshCurrent.name) {
+        updateTableName(tableId, trimmedText);
+        if (onNameChange) onNameChange(trimmedText, tableId);
+      }
     }
+    setEditingTableId(null);
   };
 
   const handleBlur = () => {
@@ -60,7 +70,7 @@ const TableName = ({ className }: TableNameProps) => {
   return (
     <div
       className={cn(
-        "mb-3.5 flex items-center border-b-2 border-black w-fit",
+        "mb-3.5 flex items-center border-b border-border w-fit",
         className
       )}
     >
@@ -75,12 +85,18 @@ const TableName = ({ className }: TableNameProps) => {
           className="font-medium border-none shadow-none p-0 h-auto focus-visible:ring-0 min-w-[100px] rounded-none"
         />
       ) : (
-        <span
+        <button
+          type="button"
           onClick={handleClick}
-          className="font-medium cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+          disabled={disabled}
+          className={cn(
+            "font-medium cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition-colors",
+            disabled && "opacity-50 cursor-not-allowed"
+          )}
+          aria-label="Edit table name"
         >
           {currentTable.name}
-        </span>
+        </button>
       )}
     </div>
   );
