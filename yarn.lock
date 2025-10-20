@@ -2352,6 +2352,7 @@ __metadata:
   resolution: "checklist@workspace:."
   dependencies:
     "@eslint/eslintrc": "npm:^3"
+    "@next/eslint-plugin-next": "npm:15.2.0"
     "@radix-ui/react-context-menu": "npm:^2.2.15"
     "@radix-ui/react-dialog": "npm:^1.1.11"
     "@radix-ui/react-popover": "npm:^1.1.6"
